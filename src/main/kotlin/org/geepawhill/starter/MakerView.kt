@@ -1,7 +1,6 @@
 package org.geepawhill.starter
 
 import javafx.animation.AnimationTimer
-import javafx.event.EventHandler
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
@@ -19,6 +18,22 @@ const val BUCKET_HEIGHT = 64.0
 const val BUCKET_HALF = BUCKET_WIDTH / 2.0
 
 
+class Input {
+
+    private val keys = mutableListOf<KeyEvent>()
+
+    val hasKey: Boolean
+        get() = keys.isNotEmpty()
+
+    fun handle(event: KeyEvent) {
+        keys += event
+    }
+
+    fun popTo(deltaTime: Double, handler: (event: KeyEvent, deltaTime: Double) -> Unit) {
+        if (hasKey) handler(keys.removeFirst(), deltaTime)
+    }
+}
+
 class MakerView : View("Raindrops") {
 
     inner class Timer : AnimationTimer() {
@@ -32,16 +47,14 @@ class MakerView : View("Raindrops") {
         }
     }
 
+    val input = Input()
+
     val timer = Timer()
 
     val bucket = imageview {
         x = SCREEN_HALF - BUCKET_HALF
         y = SCREEN_HEIGHT - BUCKET_HEIGHT
         image = Image("/bucket.png")
-    }
-
-    val keyHandler = EventHandler<KeyEvent> {
-        handleKey(it)
     }
 
     override val root = pane {
@@ -52,7 +65,7 @@ class MakerView : View("Raindrops") {
         background = Background(BackgroundFill(Color.LIGHTBLUE, null, null))
         isFocusTraversable = true
         addEventHandler(KeyEvent.KEY_PRESSED) { event: KeyEvent ->
-            handleKey(event)
+            input.handle(event)
         }
         addEventHandler(MouseEvent.MOUSE_CLICKED) { _ ->
             requestFocus()
@@ -64,25 +77,25 @@ class MakerView : View("Raindrops") {
         timer.start()
     }
 
-    private fun handleKey(event: KeyEvent) {
+    private fun handleKey(event: KeyEvent, deltaTime: Double) {
         when (event.code) {
-            KeyCode.A, KeyCode.LEFT -> left()
-            KeyCode.D, KeyCode.RIGHT -> right()
+            KeyCode.A, KeyCode.LEFT -> left(deltaTime)
+            KeyCode.D, KeyCode.RIGHT -> right(deltaTime)
             else -> {}
         }
     }
 
-    private fun left() {
-        println("l")
+    private fun left(deltaTime: Double) {
+        bucket.x = bucket.x - (200.0 / deltaTime)
+        if (bucket.x < 0.0) bucket.x = 0.0
     }
 
-    private fun right() {
-        println("r")
+    private fun right(deltaTime: Double) {
+        bucket.x = bucket.x + (200.0 / deltaTime)
+        if (bucket.x > SCREEN_WIDTH - BUCKET_WIDTH) bucket.x = SCREEN_WIDTH - BUCKET_WIDTH
     }
 
     private fun pulse(deltaTime: Double) {
-        println(deltaTime)
-        bucket.x = bucket.x - (200.0 / deltaTime)
-        if (bucket.x < 0.0) bucket.x = 0.0
+        input.popTo(deltaTime, this::handleKey)
     }
 }
