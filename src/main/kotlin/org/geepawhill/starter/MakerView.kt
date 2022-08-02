@@ -1,5 +1,6 @@
 package org.geepawhill.starter
 
+import javafx.animation.AnimationTimer
 import javafx.event.EventHandler
 import javafx.scene.image.Image
 import javafx.scene.input.KeyCode
@@ -17,7 +18,21 @@ const val BUCKET_WIDTH = 64.0
 const val BUCKET_HEIGHT = 64.0
 const val BUCKET_HALF = BUCKET_WIDTH / 2.0
 
+
 class MakerView : View("Raindrops") {
+
+    inner class Timer : AnimationTimer() {
+        private var lastFrame = System.nanoTime()
+        public var deltaTime = 0.0
+
+        override fun handle(now: Long) {
+            deltaTime = (now - lastFrame).toDouble() / 1000000.0
+            lastFrame = now
+            pulse(deltaTime)
+        }
+    }
+
+    val timer = Timer()
 
     val bucket = imageview {
         x = SCREEN_HALF - BUCKET_HALF
@@ -36,17 +51,17 @@ class MakerView : View("Raindrops") {
         maxHeight = SCREEN_HEIGHT
         background = Background(BackgroundFill(Color.LIGHTBLUE, null, null))
         isFocusTraversable = true
-        addEventHandler(KeyEvent.KEY_PRESSED) { e: KeyEvent ->
-            handleKey(e)
+        addEventHandler(KeyEvent.KEY_PRESSED) { event: KeyEvent ->
+            handleKey(event)
         }
-        addEventHandler(MouseEvent.MOUSE_CLICKED) { e: MouseEvent ->
+        addEventHandler(MouseEvent.MOUSE_CLICKED) { _ ->
             requestFocus()
         }
         this += bucket
     }
 
     init {
-        root.requestFocus()
+        timer.start()
     }
 
     private fun handleKey(event: KeyEvent) {
@@ -63,5 +78,9 @@ class MakerView : View("Raindrops") {
 
     private fun right() {
         println("r")
+    }
+
+    private fun pulse(deltaTime: Double) {
+        println(deltaTime)
     }
 }
