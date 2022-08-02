@@ -82,5 +82,7 @@ class MakerView : View("Raindrops") {
 
     private fun pulse(deltaTime: Double) {
         println(deltaTime)
+        bucket.x = bucket.x - (200.0 / deltaTime)
+        if (bucket.x < 0.0) bucket.x = 0.0
     }
 }
