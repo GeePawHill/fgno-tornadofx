@@ -8,6 +8,7 @@ import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.paint.Color
+import javafx.stage.WindowEvent
 import tornadofx.*
 
 const val SCREEN_WIDTH = 800.0
@@ -29,7 +30,7 @@ class Input {
         keys += event
     }
 
-    fun popTo(deltaTime: Double, handler: (event: KeyEvent, deltaTime: Double) -> Unit) {
+    fun respondTo(deltaTime: Double, handler: (event: KeyEvent, deltaTime: Double) -> Unit) {
         if (hasKey) handler(keys.removeFirst(), deltaTime)
     }
 }
@@ -74,6 +75,9 @@ class MakerView : View("Raindrops") {
     }
 
     init {
+        primaryStage.addEventHandler(WindowEvent.WINDOW_SHOWN) {
+            root.requestFocus()
+        }
         timer.start()
     }
 
@@ -96,6 +100,8 @@ class MakerView : View("Raindrops") {
     }
 
     private fun pulse(deltaTime: Double) {
-        input.popTo(deltaTime, this::handleKey)
+        println(deltaTime)
+        input.respondTo(deltaTime, this::handleKey)
+        
     }
 }
