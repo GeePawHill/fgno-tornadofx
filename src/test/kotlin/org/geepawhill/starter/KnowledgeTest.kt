@@ -18,6 +18,7 @@ class KnowledgeTest {
         // assertThat(knowledge).isInstanceOf(Knowledge)
     }
 
+    @Test
     fun addAndRetrieveItem() {
         val k = Knowledge()
         k.addItemAt(item="Hello", at=Point(10,10))
